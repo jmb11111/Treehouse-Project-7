@@ -20,39 +20,34 @@ console.log(n);
 //  get the list of user tweets
 //
 T.get('statuses/home_timeline', { screen_name: 'josh121592', count: 10},  function (err, data, response) {
-    twitterFeedData = [data[0]
-    ,data[1]
-    ,data[2]
-    ,data[3]
-    ,data[4]
-    ,data[5]
-    ,data[6]
-    ,data[7]
-    ,data[8]
-    ,data[9]];
+   if (!err) {
+    twitterFeedData = data;
+   }else{
+       console.log(data);
+       
+   }
+   
+  
   });
 
-T.get('followers/list', { screen_name: 'josh121592', count: 10},  function (err, followData, response) {
-    followerDataArray=[
-    followData.users[0],
-    followData.users[1],
-    followData.users[2],
-    followData.users[3],
-    followData.users[4],
-    followData.users[5],
-    followData.users[6],
-    followData.users[7],
-    followData.users[8],
-    followData.users[9]];
+T.get('friends/list', { screen_name: 'josh121592', count: 70},  function (err, followData, response) {
+   if(!err){ 
+       
+       
+    followerDataArray=followData.users;
+   
+   }else{
+       console.log(followData);
+   }
     
   });
 
 
 
 router.get('/', (req, res) => {
-    
+    console.log(followerDataArray.length);
     for (let i = 0; i < twitterFeedData.length; i++) {
-        tweet[i] ={
+    tweet[i] ={
         text: twitterFeedData[i].text,
         name: twitterFeedData[i].user.name,
         screenName : twitterFeedData[i].user.screen_name,
@@ -62,15 +57,16 @@ router.get('/', (req, res) => {
         tweetLink: twitterFeedData[i].user.url,
         retweetLink: twitterFeedData[i].id_str,
         timeStamp: n-Number(twitterFeedData[i].created_at.slice(11,13))+'h'
-    };  
-        follower[i]={
+    }};
+    for (let i = 0; i < followerDataArray.length; i++) {
+            follower[i]={
             profilePicUrl: followerDataArray[i].profile_image_url,
             name: followerDataArray[i].name,
             userName: followerDataArray[i].screen_name
         } 
 
-        }
-    
+        };
+    following= followerDataArray.length;
     tweetText=tweet;
     followerInfo= follower;
      res.render('index');
@@ -80,12 +76,5 @@ router.get('/', (req, res) => {
 
 
 
-router.get('/favorited0', (req,res) =>{
-    T.post('favorites/create', { id: `${twitterFeedData[0].id_str}` }, function (err, data, response) {
-        console.log('favorited')
-      })
-    return res.redirect('/')
-    console.log(favoriteCount0)
-});
 
 module.exports = router;
