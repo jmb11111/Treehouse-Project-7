@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 var Twit = require('twit');
-let twitterTest = {};
+let twitterFeedData = [];
+
 var T = new Twit({
   consumer_key:         'fSUa8sb97bhxl1j1xZNtMAyDb',
   consumer_secret:      '6kZxAtsGogv1KqAYJ2bdkyEKXZPsdlZsQ7SaWLVmb5DDOxsb1b',
@@ -11,19 +12,46 @@ var T = new Twit({
   timeout_ms:           60*1000,  // optional HTTP request timeout to apply to all requests.
   strictSSL:            true,     // optional - requires SSL certificates to be valid.
 });
+let tweet =[];
 
 //  get the list of user tweets
 //
-T.get('statuses/user_timeline', { screen_name: 'josh121592', count: 10},  function (err, data, response) {
-    twitterTest = [data[0].text,data[1].text,data[2].text,data[3].text,data[4].text,data[5].text];
+T.get('statuses/home_timeline', { screen_name: 'josh121592', count: 5},  function (err, data, response) {
+    twitterFeedData = [data[0],data[1],data[2],data[3],data[4]];
+    for (let i = 0; i < twitterFeedData.length; i++) {
+        tweet[i] ={
+        text : twitterFeedData[i].text,
+        name: twitterFeedData[i].user.name,
+        screenName : twitterFeedData[i].user.screen_name,
+        userpic : twitterFeedData[i].user.profile_image_url,
+        retweetCount: twitterFeedData[i].retweet_count,
+        favoriteCount: twitterFeedData[i].favorite_count,
+        tweetLink: twitterFeedData[i].user.url,
+        retweetLink: twitterFeedData[i].id_str
+    }   
+
+        }
+
   })
 
 
-
 router.get('/', (req, res) => {
+   
+tweetText=tweet;
+
      res.render('index');
-     console.log(twitterTest);
+     
 });
 
+
+
+
+router.get('/favorited0', (req,res) =>{
+    T.post('favorites/create', { id: `${twitterFeedData[0].id_str}` }, function (err, data, response) {
+        console.log('favorited')
+      })
+    return res.redirect('/')
+    console.log(favoriteCount0)
+});
 
 module.exports = router;

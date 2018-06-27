@@ -2349,6 +2349,7 @@ a:hover .app--avatar {
 .app--tweet--actions a:hover, .app--user--actions a:hover {
   color: #1da1f2;
 }
+
 /* line 170, ../sass/global.sass */
 .app--tweet--actions a:hover svg, .app--user--actions a:hover svg {
   fill: #1da1f2;
