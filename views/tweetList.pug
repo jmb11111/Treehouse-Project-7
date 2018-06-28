@@ -2,14 +2,10 @@ ul.app--tweet--list
     each tweet in tweetText
           li
             strong.app--tweet--timestamp= tweet.timeStamp
-            a.app--tweet--author(href=`https://twitter.com/${tweet.screenName}`)
+            a.app--tweet--author
               .app--avatar(style=`background-image: url(${tweet.userpic})`)
                 img(src='static/images/f-spore.png')
-              h4= tweet.name 
-              |   @#{tweet.screenName}
-              
-
-              
+            h4 #{tweet.name} #[a(href=`https://twitter.com/${tweet.screenName}`)=`@${tweet.screenName}`]
             p= tweet.text
             ul.app--tweet--actions.circle--list--inline
               li

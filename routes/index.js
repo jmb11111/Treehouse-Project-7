@@ -3,38 +3,26 @@ const router = express.Router();
 
 var Twit = require('twit');
 var config = require('../config.js');
-console.log(config);
+
 var T = new Twit(config);
 
 
 let tweet = [];
 let follower = [];
+let followerDataArray;
+let messageText;
+let messageSenderPicture;
 var d = new Date();
 var n = d.getUTCHours();
 console.log(n);
-//  get the list of user tweets
-//
-T.get('statuses/home_timeline', { screen_name: 'josh121592', count: 10 }, function (err, data, response) {
+
+
+T.get('statuses/user_timeline', { screen_name: 'josh121592', count: 10 }, function (err, data, response) {
     if (!err) {
         twitterFeedData = data;
     } else {
         console.log(data);
-    }
-});
-
-T.get('followers/list', { screen_name: 'josh121592', count: 70 }, function (err, followData, response) {
-    if (!err) {
-        followerDataArray = followData.users;
-        console.log(followerDataArray[1]);
-    } else {
-        console.log(followData);
-    }
-});
-
-
-
-router.get('/', (req, res) => {
-    for (let i = 0; i < twitterFeedData.length; i++) {
+    } for (let i = 0; i < twitterFeedData.length; i++) {
         tweet[i] = {
             text: twitterFeedData[i].text,
             name: twitterFeedData[i].user.name,
@@ -61,11 +49,20 @@ router.get('/', (req, res) => {
             })
         }
     };
-    for (let i = 0; i < followerDataArray.length; i++) {
+});
+
+T.get('friends/list', { screen_name: 'josh121592', count: 70 }, function (err, followData, response) {
+    if (!err) {
+        followerDataArray = followData.users;
+        // console.log(followerDataArray[1]);
+    } else {
+        console.log(followData);
+    } for (let i = 0; i < followerDataArray.length; i++) {
         follower[i] = {
             profilePicUrl: followerDataArray[i].profile_image_url,
             name: followerDataArray[i].name,
             userName: followerDataArray[i].screen_name,
+            userNameT: `@${followerDataArray[i].screen_name}`,
             unfollow: '/unfollow/' + followerDataArray[i].id_str,
             follow: '/follow/' + followerDataArray[i].id_str,
             followStatus: followerDataArray[i].following,
@@ -84,9 +81,40 @@ router.get('/', (req, res) => {
         }
 
     };
+});
+
+T.get('direct_messages/events/list', function (err, dmData, response) {
+    if (!err) {
+        let senderID = dmData.events[0].message_create.sender_id;
+        let messageID = dmData.events[0].id;
+        T.get('direct_messages/events/show', { id: messageID }, function (err, dMessage, response) {
+            if (!err) {
+                messageText = dMessage.event.message_create.message_data.text;
+                console.log(messageText);
+            } else {
+                console.log('dm events'+err);
+            }
+        }); 
+            T.get('users/lookup', { user_id: senderID }, function (err, messageSender, response) {
+                if (!err) {
+                    console.log(messageSender[0].profile_image_url);
+                    messageSenderPicture = messageSender[0].profile_image_url;
+                } else {
+                    console.log('userInfo'+err);
+                }
+            });
+    } else {
+        console.log(dmData);
+    }
+});
+
+
+router.get('/', (req, res) => {
+    dmMessageTextSent = messageText;
     following = followerDataArray.length;
     tweetText = tweet;
     followerInfo = follower;
+    messageSenderPictureURL= messageSenderPicture;
     res.render('index');
 
 });
