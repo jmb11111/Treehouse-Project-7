@@ -23,75 +23,77 @@ let directMessagesArray;
 let userMessage = [];
 let recievedMessage = [];
 let currentUserPic;
+let userMessageID=[];
+let recievedMessageID=[];
 
-// T.get('users/lookup', { screen_name: "josh121592" }, function (err, currentUser, response) {
-//     if (!err) {
-//         // console.log(currentUser[0].id_str);
-//         // console.log(currentUser[0].profile_image_url);
-//         currentUserID = currentUser[0].id_str;
-//         currentUserPic = currentUser[0].profile_image_url;
-//         T.get('direct_messages/events/list', { id: currentUserID }, function (err, dmData, response) {
-//             if (!err) {
-//                 directMessagesArray = dmData;
+T.get('users/lookup', { screen_name: "josh121592" }, function (err, currentUser, response) {
+    if (!err) {
+        // console.log(currentUser[0].id_str);
+        // console.log(currentUser[0].profile_image_url);
+        currentUserID = currentUser[0].id_str;
+        currentUserPic = currentUser[0].profile_image_url;
+        T.get('direct_messages/events/list', { id: currentUserID }, function (err, dmData, response) {
+            if (!err) {
+                directMessagesArray = dmData;
 
-//                 // console.log(directMessagesArray);
+                // console.log(directMessagesArray);
 
-//                 for (let i = 0; i < dmData.events.length; i++) {
+                for (let i = 0; i < dmData.events.length; i++) {
 
-//                     if (dmData.events[i].message_create.sender_id === currentUserID) {
-//                         userMessageID.push(dmData.events[i].id);
-//                         // console.log('user'+userMessageID);
+                    if (dmData.events[i].message_create.sender_id === currentUserID) {
+                        userMessageID.push(dmData.events[i].id);
+                        // console.log('user'+userMessageID);
 
-//                     } else {
-//                         recievedMessageID.push(dmData.events[i].id);
-//                         // console.log('recieved'+recievedMessageID);
+                    } else {
+                        recievedMessageID.push(dmData.events[i].id);
+                        // console.log('recieved'+recievedMessageID);
 
-//                     }
-//                 }
+                    }
+                }
 
 
-//                 for (let i = 0; i < userMessageID.length; i++) {
-//                     T.get('direct_messages/events/show', { id: userMessageID[i] }, function (err, dMessage, response) {
-//                         if (!err) {
-//                             userMessage.push({
-//                                 id: dMessage.event.message_create.sender_id,
-//                                 text: dMessage.event.message_create.message_data.text,
-//                                 date: new Date(dMessage.event.created_timestamp*1000)
+                for (let i = 0; i < userMessageID.length; i++) {
+                    T.get('direct_messages/events/show', { id: userMessageID[i] }, function (err, dMessage, response) {
+                        if (!err) {
+                            userMessage.push({
+                                id: dMessage.event.message_create.sender_id,
+                                text: dMessage.event.message_create.message_data.text,
+                                date: new Date(dMessage.event.created_timestamp*1000)
 
-//                             });
-//                             // console.log(userMessage);
-//                         } else {
-//                             console.log('fail 2' + err);
-//                         }
-//                     });
-//                 } for (let i = 0; i < recievedMessageID.length; i++) {
-//                     T.get('direct_messages/events/show', { id: recievedMessageID[i] }, function (err, reMessage, response) {
+                            });
+                            // console.log(userMessage);
+                        } else {
+                            console.log('fail 2' + err);
+                        }
+                    });
+                } for (let i = 0; i < recievedMessageID.length; i++) {
+                    T.get('direct_messages/events/show', { id: recievedMessageID[i] }, function (err, reMessage, response) {
 
-//                         console.log(reMessage);
+                        console.log(reMessage);
 
-//                         recievedMessage.push({
-//                             id: reMessage.event.message_create.sender_id,
-//                             text: reMessage.event.message_create.message_data.text,
-//                             date: new Date(reMessage.event.created_timestamp*1000)
+                        recievedMessage.push({
+                            id: reMessage.event.message_create.sender_id,
+                            text: reMessage.event.message_create.message_data.text,
+                            date: new Date(reMessage.event.created_timestamp*1000)
 
-//                         });
-//                         // console.log(recievedMessage);
-//                         for (let i = 0; i < recievedMessage.length; i++) {
-//                             T.get('users/lookup', { user_id: recievedMessage[i].id }, function (err, senderUser, response) {
-//                                 recievedMessage[i].profile_image_url = senderUser[0].profile_image_url;
-//                                 console.log(recievedMessage);
-//                             })
-//                         }
-//                     });
-//                 }
-//             } else {
-//                 console.log('fail1' + err);
-//             }
-//         });
-//     } else {
-//         console.log('userInfo' + err);
-//     }
-// });
+                        });
+                        // console.log(recievedMessage);
+                        for (let i = 0; i < recievedMessage.length; i++) {
+                            T.get('users/lookup', { user_id: recievedMessage[i].id }, function (err, senderUser, response) {
+                                recievedMessage[i].profile_image_url = senderUser[0].profile_image_url;
+                                console.log(recievedMessage);
+                            })
+                        }
+                    });
+                }
+            } else {
+                console.log('fail1' + err);
+            }
+        });
+    } else {
+        console.log('userInfo' + err);
+    }
+});
 
 
 T.get('statuses/home_timeline', { screen_name: 'josh121592', count: 10 }, function (err, data, response) {
