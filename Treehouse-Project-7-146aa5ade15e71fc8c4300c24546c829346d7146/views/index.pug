@@ -1,0 +1,35 @@
+extends layout
+block main
+  .app--tweet
+    form(action="/" , method='POST')
+      .circle--fluid
+        .circle--fluid--cell.circle--fluid--primary.align-bottom.app--tweet--post
+          .app--avatar(style=`background-image: url(${profileImg})`)
+            img(src='static/images/m-spore.png')
+          
+          input#tweet-textarea.circle--textarea--input(type='text',name="tweet", placeholder="What's happening?")
+          strong#tweet-char.app--tweet--char
+        .circle--fluid--cell.align-bottom
+          button(type='submit').button-primary Tweet
+   
+  .bounds.app--body
+    .app--section--header
+      .grid-33
+        .app--section--heading
+          h2 Timeline
+      .grid-33
+        .app--section--heading
+          strong= following
+          h2 Following
+      .grid-33
+        .app--section--heading
+          h2 Direct Messages
+    .grid-33
+      .app--section
+        include tweetList.pug
+    .grid-33
+      .app--section
+        include followerList.pug
+    .grid-33
+      .app--section
+        include dm.pug

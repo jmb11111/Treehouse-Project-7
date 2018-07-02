@@ -1,0 +1,18 @@
+ul.app--user--list
+    each follower in followerInfo
+          li
+            .circle--fluid
+              .circle--fluid--cell.circle--fluid--primary
+                a.app--tweet--author
+                  .app--avatar(style=`background-image: url(${follower.profilePicUrl})`)
+                    img(src='static/images/f-spore.png')
+                  h4= follower.name
+                  p(href=`https://twitter.com/${follower.userName}`)= follower.userNameT
+              if follower.followStatus === true
+                .circle--fluid--cell
+                  a.button.button-text(href=`${follower.unfollow}`) Unfollow 
+              else
+                .circle--fluid--cell
+                  a.button.button-text(href=`${follower.follow}`) Follow
+
+                   
