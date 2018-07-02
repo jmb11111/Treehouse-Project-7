@@ -2,16 +2,16 @@ ul.app--message--list
           li
             h3
               | Conversation with 
-              a Jill Spore
+              a= Sender
             ul.app--message--conversation
                 each dm in directMessages
                     if dm.message_create.sender_id === userID
                         li.app--message--me
                             .app--avatar(style=`background-image: url(${profileImg})`)
                             p.app--message--text= dm.message_create.message_data.text
-                            p.app--message--timestamp dm.date
+                            p.app--message--timestamp=dm.date
                     else
                         li.app--message
                             .app--avatar(style=`background-image: url(${dm.pic})`)
                             p.app--message--text= dm.message_create.message_data.text
-                            p.app--message--timestamp dm.date
+                            p.app--message--timestamp=dm.date

@@ -4,11 +4,11 @@ block main
     form(action="/" , method='POST')
       .circle--fluid
         .circle--fluid--cell.circle--fluid--primary.align-bottom.app--tweet--post
-          .app--avatar(style=`background-image: url(${messageSenderPictureURL})`)
+          .app--avatar(style=`background-image: url(${profileImg})`)
             img(src='static/images/m-spore.png')
           
           input#tweet-textarea.circle--textarea--input(type='text',name="tweet", placeholder="What's happening?")
-          strong#tweet-char.app--tweet--char 140
+          strong#tweet-char.app--tweet--char
         .circle--fluid--cell.align-bottom
           button(type='submit').button-primary Tweet
    

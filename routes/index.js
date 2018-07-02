@@ -14,23 +14,24 @@ let tweet = [];
 let follower = [];
 let followerDataArray;
 
-let messageSenderPicture;
+let messageSender= '';
 var d = new Date();
 var n = d.getUTCHours();
-let currentUserID;
-
+let currentUserID = '';
+let currentUserUsername= config.userName;
 let directMessagesArray;
-
-let currentUserPic;
-let pic =[];
+let currentUserName;
+let currentUserPic= '';
 let dms =[];
+let messageSenderArray=[];
 
-T.get('users/lookup', { screen_name: "josh121592" }, function (err, currentUser, response) {
+T.get('users/lookup', { screen_name: currentUserUsername }, function (err, currentUser, response) {
     if (!err) {
         // console.log(currentUser[0].id_str);
         // console.log(currentUser[0].profile_image_url);
         currentUserID = currentUser[0].id_str;
         currentUserPic = currentUser[0].profile_image_url;
+        currentUserName =currentUser[0].name;
         T.get('direct_messages/events/list', { id: currentUserID }, function (err, dmData, response) {
             if (!err) {
                 directMessagesArray = dmData.events;
@@ -38,25 +39,29 @@ T.get('users/lookup', { screen_name: "josh121592" }, function (err, currentUser,
                 
                     directMessagesArray.forEach(dm =>{
                         dms.push(dm);
-                        console.log(dms.length);
-                        
+                       
                         for (let index = 0; index < dms.length; index++) {
            
                             T.get('users/lookup', { user_id: dms[index].message_create.sender_id }, function (err, messageInfo, response) {
                             
-                             dms.forEach(dm => {
-                                  messageInfo.forEach(picUrl => {
-                                     dm.pic=picUrl.profile_image_url; 
+                               
                                      
-                                                        
+                             dms.forEach(dm => {
+                                  dm.date = new Date(parseInt(dm.created_timestamp));
+                                  messageInfo.forEach(picUrl => {
+                                  dm.pic=picUrl.profile_image_url; 
+                                  messageSenderArray.push(picUrl.name);                      
                                  })   
+
+
                              })   
                              });
                         }
                     });
-       
-  
+                   
       
+            }else{
+                console.log(err.message);
             }
         });
        
@@ -65,6 +70,8 @@ T.get('users/lookup', { screen_name: "josh121592" }, function (err, currentUser,
     }
     
 });
+
+
 
 
 T.get('statuses/home_timeline', { screen_name: currentUserID, count: 10 }, function (err, data, response) {
@@ -102,9 +109,12 @@ T.get('statuses/home_timeline', { screen_name: currentUserID, count: 10 }, funct
     }
 });
 
-T.get('followers/list', { screen_name: currentUserID, count: 70 }, function (err, followData, response) {
+T.get('friends/list', { screen_name: currentUserID, count: 70 }, function (err, followData, response) {
     if (!err) {
         followerDataArray = followData.users;
+        followerDataArray.forEach(follower => {
+            
+        });
         for (let i = 0; i < followerDataArray.length; i++) {
             follower[i] = {
                 profilePicUrl: followerDataArray[i].profile_image_url,
@@ -135,21 +145,28 @@ T.get('followers/list', { screen_name: currentUserID, count: 70 }, function (err
 });
 
 
-
-
-
+messageSender = messageSenderArray.find(function(senderName){
+                                    
+    return senderName !== currentUserName;
+  });
+router.get('/error',(req, res)=>{
+    res.render('error');
+})
 router.get('/', (req, res) => {
-    console.log(dms);
-    
+    if(messageSender !== '' && currentUserPic !== '' && currentUserID !== '' && dms !== [] && followerDataArray.length !== 0 && tweet !== [] && follower !== [] ){
+    UserName =currentUserUsername;
+    Sender = messageSender;
     profileImg = currentUserPic;
     userID = currentUserID;
     directMessages = dms;
     following = followerDataArray.length;
     tweetText = tweet;
     followerInfo = follower;
-    messageSenderPictureURL = messageSenderPicture;
     res.render('index');
-
+    }
+    else{
+        res.redirect('/error')
+    }
 });
 router.post('/', function (req, res) {
 
