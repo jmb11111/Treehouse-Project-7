@@ -3,7 +3,7 @@ const router = express.Router();
 const bodyParser = require('body-parser');
 
 
-router.use(bodyParser.urlencoded({ extended: false}));
+router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
 var Twit = require('twit');
@@ -20,11 +20,10 @@ var n = d.getUTCHours();
 let currentUserID;
 
 let directMessagesArray;
-let userMessage = [];
-let recievedMessage = [];
+
 let currentUserPic;
-let userMessageID=[];
-let recievedMessageID=[];
+let pic =[];
+let dms =[];
 
 T.get('users/lookup', { screen_name: "josh121592" }, function (err, currentUser, response) {
     if (!err) {
@@ -34,69 +33,41 @@ T.get('users/lookup', { screen_name: "josh121592" }, function (err, currentUser,
         currentUserPic = currentUser[0].profile_image_url;
         T.get('direct_messages/events/list', { id: currentUserID }, function (err, dmData, response) {
             if (!err) {
-                directMessagesArray = dmData;
-
-                // console.log(directMessagesArray);
-
-                for (let i = 0; i < dmData.events.length; i++) {
-
-                    if (dmData.events[i].message_create.sender_id === currentUserID) {
-                        userMessageID.push(dmData.events[i].id);
-                        // console.log('user'+userMessageID);
-
-                    } else {
-                        recievedMessageID.push(dmData.events[i].id);
-                        // console.log('recieved'+recievedMessageID);
-
-                    }
-                }
-
-
-                for (let i = 0; i < userMessageID.length; i++) {
-                    T.get('direct_messages/events/show', { id: userMessageID[i] }, function (err, dMessage, response) {
-                        if (!err) {
-                            userMessage.push({
-                                id: dMessage.event.message_create.sender_id,
-                                text: dMessage.event.message_create.message_data.text,
-                                date: new Date(dMessage.event.created_timestamp*1000)
-
-                            });
-                            // console.log(userMessage);
-                        } else {
-                            console.log('fail 2' + err);
+                directMessagesArray = dmData.events;
+                
+                
+                    directMessagesArray.forEach(dm =>{
+                        dms.push(dm);
+                        console.log(dms.length);
+                        
+                        for (let index = 0; index < dms.length; index++) {
+           
+                            T.get('users/lookup', { user_id: dms[index].message_create.sender_id }, function (err, messageInfo, response) {
+                            
+                             dms.forEach(dm => {
+                                  messageInfo.forEach(picUrl => {
+                                     dm.pic=picUrl.profile_image_url; 
+                                     
+                                                        
+                                 })   
+                             })   
+                             });
                         }
                     });
-                } for (let i = 0; i < recievedMessageID.length; i++) {
-                    T.get('direct_messages/events/show', { id: recievedMessageID[i] }, function (err, reMessage, response) {
-
-                        console.log(reMessage);
-
-                        recievedMessage.push({
-                            id: reMessage.event.message_create.sender_id,
-                            text: reMessage.event.message_create.message_data.text,
-                            date: new Date(reMessage.event.created_timestamp*1000)
-
-                        });
-                        // console.log(recievedMessage);
-                        for (let i = 0; i < recievedMessage.length; i++) {
-                            T.get('users/lookup', { user_id: recievedMessage[i].id }, function (err, senderUser, response) {
-                                recievedMessage[i].profile_image_url = senderUser[0].profile_image_url;
-                                console.log(recievedMessage);
-                            })
-                        }
-                    });
-                }
-            } else {
-                console.log('fail1' + err);
+       
+  
+      
             }
         });
+       
     } else {
         console.log('userInfo' + err);
     }
+    
 });
 
 
-T.get('statuses/home_timeline', { screen_name: 'josh121592', count: 10 }, function (err, data, response) {
+T.get('statuses/home_timeline', { screen_name: currentUserID, count: 10 }, function (err, data, response) {
     if (!err) {
         twitterFeedData = data;
         for (let i = 0; i < twitterFeedData.length; i++) {
@@ -128,38 +99,39 @@ T.get('statuses/home_timeline', { screen_name: 'josh121592', count: 10 }, functi
         };
     } else {
         console.log(data);
-    } 
+    }
 });
 
-T.get('followers/list', { screen_name: 'josh121592', count: 70 }, function (err, followData, response) {
+T.get('followers/list', { screen_name: currentUserID, count: 70 }, function (err, followData, response) {
     if (!err) {
         followerDataArray = followData.users;
+        for (let i = 0; i < followerDataArray.length; i++) {
+            follower[i] = {
+                profilePicUrl: followerDataArray[i].profile_image_url,
+                name: followerDataArray[i].name,
+                userName: followerDataArray[i].screen_name,
+                userNameT: `@${followerDataArray[i].screen_name}`,
+                unfollow: '/unfollow/' + followerDataArray[i].id_str,
+                follow: '/follow/' + followerDataArray[i].id_str,
+                followStatus: followerDataArray[i].following,
+                followFunction: router.get('/follow/' + followerDataArray[i].id_str, (req, res) => {
+                    T.post('friendships/create', { id: followerDataArray[i].id_str }, function (err, data, respons) {
+                        console.log('followed');
+                    })
+                    res.redirect('/');
+                }),
+                unfollowFunction: router.get('/unfollow/' + followerDataArray[i].id_str, (req, res) => {
+                    T.post('friendships/destroy', { id: followerDataArray[i].id_str }, function (err, data, respons) {
+                        console.log('unfollowed');
+                    })
+                    res.redirect('/');
+                })
+            }
+
+        };
     } else {
         console.log(followData);
-    } for (let i = 0; i < followerDataArray.length; i++) {
-        follower[i] = {
-            profilePicUrl: followerDataArray[i].profile_image_url,
-            name: followerDataArray[i].name,
-            userName: followerDataArray[i].screen_name,
-            userNameT: `@${followerDataArray[i].screen_name}`,
-            unfollow: '/unfollow/' + followerDataArray[i].id_str,
-            follow: '/follow/' + followerDataArray[i].id_str,
-            followStatus: followerDataArray[i].following,
-            followFunction: router.get('/follow/' + followerDataArray[i].id_str, (req, res) => {
-                T.post('friendships/create', { id: followerDataArray[i].id_str }, function (err, data, respons) {
-                    console.log('followed');
-                })
-                res.redirect('/');
-            }),
-            unfollowFunction: router.get('/unfollow/' + followerDataArray[i].id_str, (req, res) => {
-                T.post('friendships/destroy', { id: followerDataArray[i].id_str }, function (err, data, respons) {
-                    console.log('unfollowed');
-                })
-                res.redirect('/');
-            })
-        }
-
-    };
+    }
 });
 
 
@@ -167,11 +139,11 @@ T.get('followers/list', { screen_name: 'josh121592', count: 70 }, function (err,
 
 
 router.get('/', (req, res) => {
-    console.log(directMessagesArray);
+    console.log(dms);
+    
     profileImg = currentUserPic;
     userID = currentUserID;
-    dmRecievedArray = recievedMessage;
-    dmSentArray = userMessage;
+    directMessages = dms;
     following = followerDataArray.length;
     tweetText = tweet;
     followerInfo = follower;
@@ -179,20 +151,20 @@ router.get('/', (req, res) => {
     res.render('index');
 
 });
-router.post('/',function(req,res){
-  
+router.post('/', function (req, res) {
+
     console.log(req.body);
-    T.post('statuses/update', { status: req.body.tweet }, function(err, data, response) {
-        if(!err){
-        console.log('tweeted')
-        res.render('index');
-        }else{
+    T.post('statuses/update', { status: req.body.tweet }, function (err, data, response) {
+        if (!err) {
+            console.log('tweeted')
+            res.render('index');
+        } else {
             console.log("unable to post");
-            
+
         }
-      })
-    
-  });
+    })
+
+});
 
 
 
