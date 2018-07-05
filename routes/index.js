@@ -14,21 +14,28 @@ let follower = [];
 let followerDataArray;
 let messageSender= '';
 let currentUserID = '';
-let currentUserUsername= config.userName;
+let currentUserUsername;
 let directMessagesArray;
 let currentUserName;
 let currentUserPic= '';
 let dms =[];
 let messageSenderArray=[];
-
+let currentUserBackground;
+let pageHeaderBackground;
 //gets current user info based on user screen name supplied from config file
-
-T.get('users/lookup', { screen_name: currentUserUsername }, function (err, currentUser, response) {
+T.get('account/settings', function (err, currentUser, response) {
     if (!err) {
-  
-        currentUserID = currentUser[0].id_str;
-        currentUserPic = currentUser[0].profile_image_url;
-        currentUserName =currentUser[0].name;
+
+        currentUserUsername = currentUser.screen_name;
+        console.log(currentUserUsername)
+        T.get('users/lookup', { screen_name: currentUserUsername }, function (err, currentUser, response) {
+
+            currentUserBackground = currentUser[0].profile_banner_url;
+            currentUserID = currentUser[0].id_str;
+            currentUserPic = currentUser[0].profile_image_url;
+            currentUserName =currentUser[0].name;
+        });
+   
         //gets direct messages from current user
         T.get('direct_messages/events/list', { id: currentUserID }, function (err, dmData, response) {
             if (!err) {
@@ -72,7 +79,7 @@ T.get('users/lookup', { screen_name: currentUserUsername }, function (err, curre
 
 //gets 10 most recent tweets from the current user
 
-T.get('statuses/home_timeline', { screen_name: currentUserID, count: 10 }, function (err, data, response) {
+T.get('statuses/user_timeline', { screen_name: currentUserID, count: 10 }, function (err, data, response) {
     if (!err) {
         twitterFeedData = data;
         // sets object properties of each tweet to populate pug template
@@ -150,7 +157,7 @@ messageSender = messageSenderArray.find(function(senderName){
                                     
     return senderName !== currentUserName;
   });
-router.get('/error',(req, res)=>{
+  router.get('/error',(req, res)=>{
     res.render('error');
 })
 
@@ -165,6 +172,7 @@ router.get('/', (req, res) => {
     following = followerDataArray.length;
     tweetText = tweet;
     followerInfo = follower;
+    backgroundImage =currentUserBackground;
     res.render('index');
     }
     else{
@@ -174,10 +182,14 @@ router.get('/', (req, res) => {
 //adds functionality to tweet box in bottom
 router.post('/', function (req, res) {
 
-    console.log(req.body);
+    
     T.post('statuses/update', { status: req.body.tweet }, function (err, data, response) {
         if (!err) {
-            console.log('tweeted')
+            console.log(req.body.tweet);
+            
+            console.log('tweeted');
+            
+
             res.render('index');
         } else {
             console.log("unable to post");
