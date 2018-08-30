@@ -1,0 +1,29 @@
+extends layout
+
+block content
+
+    .container.ml-auto.mr-auto.mt-5.row.d-flex.justify-content-between
+    .card.col-lg-3.text-center
+        img.card-img-top.img-fluid.mt-2(src='/newmember.jpg' height='285' width='285' alt='Card image cap')
+        .card-body
+        h5.card-title Newest Member
+        p.card-text Welcome George, he recently moved down from Boston, be sure to say hey!
+        a.btn.btn-primary(href='#') Say hey!
+    .card.col-lg-4.text-center
+        img.card-img-top.img-fluid.mt-2(src='/samplePerson.jpg' alt='Card image cap')
+        .card-body
+        h5.card-title 3 Time Per Week Streek
+        p.card-text Naomi has been coming 3 times per week for 18 weeks!
+        a.btn.btn-primary(href='#') That&apos;s awesome!
+    .card.col-lg-3.bg-dark.text-center
+        .card-header.bg-dark.text-white
+        | Recent PR&apos;s
+        ul.list-group.list-group-flush
+        li.list-group-item Kayla Zerva - Snatch
+        li.list-group-item Adam Molano - Squat
+        li.list-group-item Erica Larence - 500M Row
+        li.list-group-item Arron Wheeler - Push Press
+        li.list-group-item Sara Kemper - Fran
+        li.list-group-item Chelsea Boyd - Deadlift
+        li.list-group-item Al Moniz - Snatch
+        li.list-group-item Kate Schultz - RDL * 4
